@@ -1,0 +1,87 @@
+---
+title: "saeHB-Twofold-Beta"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{saeHB-Twofold-Beta}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## STEP 1: Load package and load the data
+
+```{r setup}
+library(saeHB.TF.beta)
+data("dataBeta")
+```
+
+## STEPS 2: Fitting HB Model
+
+```{r}
+model <- betaTF(y~X1+X2,area="codearea",weight="w",iter.mcmc = 10000, burn.in = 3000, iter.update = 5, thin = 10, data=dataBeta)
+```
+
+## STEP 3 Extract mean estimation
+
+### Subarea Estimation
+
+```{r}
+model$Est_sub
+```
+
+### Area Estimation
+
+```{r}
+model$Est_area
+```
+
+### Coefficient
+
+```{r}
+model$coefficient
+```
+
+### Random Effect
+
+```{r}
+model$area_randeff
+model$sub_randeff
+```
+
+### Random Effect Variance
+
+```{r}
+model$refVar
+```
+
+## STEP 4 Check Convergence via Plot MCMC
+
+Trace Plot, Density Plot, ACF Plot, R-Hat Plot
+
+```{r}
+model$plot
+```
+
+## STEP 5 : Extract CV and MSE
+
+### Subarea
+
+```{r}
+CV_sub <- (model$Est_sub$SD)/(model$Est_sub$Mean)*100
+MSE_sub <- model$Est_sub$SD^2
+summary(cbind(CV_sub,MSE_sub))
+```
+
+### Area
+
+```{r}
+CV_area <- (model$Est_area$SD)/(model$Est_area$Mean)*100
+MSE_area <- model$Est_area$SD^2
+summary(cbind(CV_area,MSE_area))
+```

@@ -1,0 +1,20 @@
+#' @docType data
+#' @title Simulated dataset Under Two Fold Subarea level model with Beta distribution and Non-Sampled subarea.
+#'
+#' @description
+#' \enumerate{
+#'   \item A dataset to simulate Small Area Estimation using Hierarchical Bayesian method under Two Fold Subarea level model with Beta distribution and Non-sampled subarea
+#'   \item This data contains NA values that indicates no sampled at one or more Subareas. It uses the \code{\link{dataBeta}} with the direct estimates and the related variances in 5 subareas are missing.
+#'  }
+#'
+#' @format A data frame with 90 rows and 6 columns:
+#' \describe{
+#'  \item{y}{Direct estimation of subarea mean \eqn{y_{ij}}}
+#'  \item{X1}{Auxiliary variable of \eqn{X_{ij1}}}
+#'  \item{X2}{Auxiliary variable of \eqn{X_{ij2}}}
+#'  \item{codearea}{Index that describes the code relating to area for each subarea}
+#'  \item{w}{Unit proportion on each subarea or weight \eqn{w_{ij}}}
+#'  \item{vardir}{Sampling variance of direct estimator \eqn{y_{ij}}}
+#' }
+#'
+"dataBetaNS"
