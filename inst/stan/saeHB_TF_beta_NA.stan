@@ -20,14 +20,14 @@ data {
   real<lower=0> tau_va; // Hyperparameter for sigma2.v
   real<lower=0> tau_vb; // Hyperparameter for sigma2.v
 }
-  
+
 parameters {
   vector[n1] u1; // Random effects (Subarea) for sampled data
   vector[n2] u2; // Random effects (Subarea) for nonsampled data
   vector[m] f; // Random effects (Area)
   vector[nvar] b; // Regression coefficients
-  vector<lower=0>[n1] phi_sampled; 
-  vector<lower=0>[n2] phi_nonsampled; 
+  vector<lower=0>[n1] phi_sampled;
+  vector<lower=0>[n2] phi_nonsampled;
   real<lower=0> phi_a; // Hyperparameter for phi.a
   real<lower=0> phi_b; // Hyperparameter for phi.b
   real<lower=0> sigma2_u; // Variance for u
@@ -77,5 +77,4 @@ model {
   for (i in 1:n1){
     y_sampled[i] ~ beta(A[i], B[i]);
   }
-
 }

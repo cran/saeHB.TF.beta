@@ -14,50 +14,24 @@ knitr::opts_chunk$set(
 )
 ```
 
-## STEP 1: Load package and load the data
+## STEP 1 Load package and load the data
 
 ```{r setup}
 library(saeHB.TF.beta)
 data("dataBeta")
 ```
 
-## STEPS 2: Fitting HB Model
+## STEP 2 Data Exploration
 
-```{r}
+```{r, message=FALSE, warning=FALSE, fig.show='hold', out.width='50%'}
+dataBeta$CV <- sqrt(dataBeta$vardir)/dataBeta$y
+explore(y~X1+X2, CV = "CV", data = dataBeta, normality = TRUE)
+```
+
+## STEPS 3 Fitting Twofold HB Beta Model
+
+```{r, results='hide', message=FALSE, warning=FALSE}
 model <- betaTF(y~X1+X2,area="codearea",weight="w",iter.mcmc = 10000, burn.in = 3000, iter.update = 5, thin = 10, data=dataBeta)
-```
-
-## STEP 3 Extract mean estimation
-
-### Subarea Estimation
-
-```{r}
-model$Est_sub
-```
-
-### Area Estimation
-
-```{r}
-model$Est_area
-```
-
-### Coefficient
-
-```{r}
-model$coefficient
-```
-
-### Random Effect
-
-```{r}
-model$area_randeff
-model$sub_randeff
-```
-
-### Random Effect Variance
-
-```{r}
-model$refVar
 ```
 
 ## STEP 4 Check Convergence via Plot MCMC
@@ -68,9 +42,44 @@ Trace Plot, Density Plot, ACF Plot, R-Hat Plot
 model$plot
 ```
 
-## STEP 5 : Extract CV and MSE
 
-### Subarea
+## STEP 5 Extract Result for Area
+
+### Area Mean Estimation
+
+```{r}
+model$Est_area
+```
+
+### Area Random Effect
+
+```{r}
+model$area_randeff
+```
+
+### Calculate Area Relative Standard Error (RSE) or CV and Mean Squared Error (MSE)
+
+```{r}
+CV_area <- (model$Est_area$SD)/(model$Est_area$Mean)*100
+MSE_area <- model$Est_area$SD^2
+summary(cbind(CV_area,MSE_area))
+```
+
+## STEP 6 Extract Result for Subarea
+
+### Subarea Mean Estimation
+
+```{r}
+model$Est_area
+```
+
+### Subarea Random Effect
+
+```{r}
+model$sub_randeff
+```
+
+### Calculate Subarea Relative Standard Error (RSE) or CV and Mean Squared Error (MSE)
 
 ```{r}
 CV_sub <- (model$Est_sub$SD)/(model$Est_sub$Mean)*100
@@ -78,10 +87,84 @@ MSE_sub <- model$Est_sub$SD^2
 summary(cbind(CV_sub,MSE_sub))
 ```
 
-### Area
+### Extract Coefficient Estimation $\beta$
 
 ```{r}
-CV_area <- (model$Est_area$SD)/(model$Est_area$Mean)*100
-MSE_area <- model$Est_area$SD^2
-summary(cbind(CV_area,MSE_area))
+model$coefficient
+```
+
+### Extract Area Random Effect Variance $\sigma_u^2$ and Subarea Random Effect Variance $\sigma_v^2$
+```{r}
+model$refVar
+```
+
+
+## STEP 7 Visualize The Result
+
+
+```{r, results='hide', warning=FALSE}
+library(ggplot2)
+```
+
+Save the output of Subarea estimation and the Direct Estimation (y)
+
+```{r}
+df <- data.frame(
+  area = seq_along(model$Est_sub$Mean),             
+  direct = dataBeta$y,              
+  mean_estimate = model$Est_sub$Mean
+)
+```
+
+Area Mean Estimation
+
+```{r}
+ggplot(df, aes(x = area)) +
+  geom_point(aes(y = direct), size = 2, colour = "#388894", alpha = 0.6) +   # scatter points
+  geom_point(aes(y = mean_estimate), size = 2, colour = "#2b707a") +   # scatter points
+  geom_line(aes(y = direct), linewidth = 1, colour = "#388894", alpha = 0.6) +  # line connecting points
+  geom_line(aes(y = mean_estimate), linewidth = 1, colour = "#2b707a") +  # line connecting points
+  labs(
+    title = "Scatter + Line Plot of Estimated Means",
+    x = "Area Index",
+    y = "Value"
+  )
+```
+
+```{r, warning=FALSE, message=FALSE}
+ggplot(df, aes(x = , direct, y = mean_estimate)) +
+  geom_point( size = 2, colour = "#2b707a") +
+   geom_abline(intercept = 0, slope = 1, color = "gray40", linetype = "dashed") +
+  geom_smooth(method = "lm", color = "#2b707a", se = FALSE) +
+  ylim(0, 1) +
+  labs(
+    title = "Scatter Plot of Direct vs Model-Based",
+    x = "Direct",
+    y = "Model Based"
+  )
+```
+
+Combine the CV of direct estimation and CV from output
+
+```{r}
+df_cv <- data.frame(
+  direct = sqrt(dataBeta$vardir)/dataBeta$y*100,              
+  cv_estimate = CV_sub
+)
+df_cv <- df_cv[order(df_cv$direct), ]
+df_cv$area <- seq_along(dataBeta$y)
+```
+
+Relative Standard Error of Subarea Mean Estimation
+
+```{r, warning=FALSE}
+ggplot(df_cv, aes(x = area)) +
+  geom_point(aes(y = direct), size = 2, colour = "#388894", alpha = 0.5) +
+  geom_point(aes(y = cv_estimate), size = 2, colour = "#2b707a") +
+  ylim(0, 100) +
+  labs(
+    title = "Scatter Plot of Direct vs Model-Based CV",
+    x = "Area",
+    y = "CV (%)"
+  )
 ```

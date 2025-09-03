@@ -17,12 +17,12 @@ data {
   real<lower=0> phi_ba; // Hyperparameter for phi.b
   real<lower=0> phi_bb; // Hyperparameter for phi.b
 }
-  
+
 parameters {
   vector[n] u; // Random effects for sampled data
   vector[m] f; // State-level random effects
   vector[nvar] b; // Regression coefficients
-  vector<lower=0>[n] phi; 
+  vector<lower=0>[n] phi;
   real<lower=0> phi_a; // Hyperparameter for phi.a
   real<lower=0> phi_b; // Hyperparameter for phi.b
   real<lower=0> sigma2_u; // Variance for u
@@ -39,7 +39,6 @@ transformed parameters {
     A[i] = mu[i] * phi[i];
     B[i] = (1 - mu[i]) * phi[i];
   }
-
 }
 
 model {
